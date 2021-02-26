@@ -1,0 +1,399 @@
+---
+title: "Homework3"
+author: "Evangeline Lim"
+date: "10/16/2019"
+output: pdf_document
+---
+
+# Question 9
+
+We can include a quadratic trend term because if the plot of residuals against time exhibits a quadratic trend, the error variance of y first increases then decreases as time duration increases. This suggests a time trend or autocorrelation over time.
+
+# Question 11
+
+(a) A one-way layout should be used. Let each of four drugs experiment on 5 participants who are selected and distributed randomly. Randomize the order of screening as well. Check if there are differences among drugs in treating the illness.
+
+(b) 
+```{r, echo = F}
+MSR = 21.47
+MSE = 2.39
+f = MSR/MSE
+f
+qf(0.01, 3, 26, lower.tail = F)
+pf(f, 3, 26, lower.tail = F)
+```
+
+F-statistic is 8.983. P-value in this test is 0.003. At the 0.01 level, the critical value is equal to 4.637, which is less than the F-statistic. Hence, we reject the null that four treatments have the same bioactivity. 
+
+(c)
+```{r, echo = F}
+qc = qtukey(p = 0.99, nmeans = 4, df = 26)/sqrt(2) 
+qc 
+tAB = (65.75-66.10)/(sqrt(MSE)*sqrt((1/8) + (1/7)))
+tAB
+tAC = (62.63-66.10)/(sqrt(MSE)*sqrt((1/9) + (1/7)))
+tAC
+tAD = (63.85-66.10)/(sqrt(MSE)*sqrt((1/6) + (1/7)))
+tAD
+tBC = (62.63-65.75)/(sqrt(MSE)*sqrt((1/9) + (1/8)))
+tBC
+tBD = (63.85-65.75)/(sqrt(MSE)*sqrt((1/6) + (1/8)))
+tBD
+tCD = (63.85-62.63)/(sqrt(MSE)*sqrt((1/6) + (1/9)))
+tCD
+```
+
+The Tukey critical value at the .01 level is 3.44. The t-statistics for comparisons between A&C and B&C are larger than 3.44. This means that A and D, and, B and C have different bioactivity at 0.01.
+
+(d)
+```{r, echo = F}
+tcontrast = ((66.1+65.75)/2  -(62.62+63.85)/2)/(sqrt(MSE)*sqrt((1/(7+8)/2+1/(9+6)/2)))
+tcontrast #formula??
+pt(tcontrast, 26, lower.tail = F)
+```
+
+The p-value is 1.88e-07, which is significantly small at the 0.01 level. We reject the null hypothesis that the brand-name and generic drugs have same bioactivity.
+
+# Question 12
+```{r, echo = F}
+data = read.csv("bolt.csv")
+data$type = factor(data$type, labels = c("P&O", "C&W", "HT"))
+lm = lm(value~type, data = data)
+anova(lm)
+
+plot(residuals(lm))
+abline(0,0)
+plot(lm, which = c(1,1))
+abline(0,0)
+
+one = sum(data$value[1:10])/10
+two = sum(data$value[11:20])/10
+three = sum(data$value[21:30])/10
+s_e = sqrt(11.71)
+t12 = (two - one)/(s_e*sqrt(1/10 + 1/10))
+t12
+t13 = (three - one)/(s_e*sqrt(1/10 + 1/10))
+t13
+t23 = (three - two)/(s_e*sqrt(1/10 + 1/10))
+t23
+
+# Bonferroni
+tcr = qt(0.05/(2*3), 27, lower.tail = F) # 3 = 3 choose 2 
+tcr
+# Tukey
+qcr = qtukey(p = 0.95, nmeans = 3, df = 27)/sqrt(2)
+qcr
+```
+
+The Bonferroni method gives a critical value of 2.552. The P&O & HT group and the C&W & HT group are both different at the 0.05 level. Also, the Tukey method gives a critical value of 2.479 and produces the same results as the Bonferroni method.
+
+# Question 14
+(a)
+```{r, echo = F}
+data2 = read.csv("onewaymuzzle.csv")
+data2$Area = factor(data2$Area, labels = c("0.016", "0.030", "0.044",  "0.058"))
+levels(data2$Area)
+lm2 = lm(Velocity ~ Area, data = data2)
+anova(lm2)
+f2 = 4505/637.5
+f2
+pf(f2, 3, 60, lower.tail = F)
+# Bonferroni
+tcrit = qt(0.05/(2*6), 60, lower.tail = F) # 6 = 4 choose 2 
+tcrit
+# Tukey
+qcrit = qtukey(p = 0.95, nmeans = 4, df = 60)/sqrt(2)
+qcrit
+# Multiple Comparisons
+a = sum(data2$Velocity[1:16])/16
+b = sum(data2$Velocity[17:32])/16
+c = sum(data2$Velocity[33:48])/16
+d = sum(data2$Velocity[49:64])/16
+se2 = sqrt(637.5)
+na = nb = nc = nd = 16
+tab = (b - a)/(se2*(sqrt(1/na + 1/nb)))
+tab
+tac = (c - a)/(se2*(sqrt(1/na + 1/nc)))
+tac
+tad = (d - a)/(se2*(sqrt(1/na + 1/nd)))
+tad
+tbc = (c - b)/(se2*(sqrt(1/nb + 1/nc)))
+tbc
+tbd = (d - b)/(se2*(sqrt(1/nb + 1/nd)))
+tbd
+tcd = (d - c)/(se2*(sqrt(1/nc + 1/nd)))
+tcd
+```
+
+The one-way anova gives an F-statistic of 7.067 and a p-value of 0.0004, which is significant at the 0.05 level to reject the null that muzzle velocity is the same for these 4 different discharge hole areas and conclude that at least one pair show significant difference.
+
+The critical value given by Bonferroni method is 2.729. According to the Bonferroni method, the 0.016 & 0.044 group, 0.016 & 0.058 group, and 0.03 & 0.058 group are different at level 0.05. 
+
+The critical value derived with Tukey method is 2.643. It gives the same results as the Bonferroni method.
+
+# Question 16
+```{r, echo = F}
+pack = read.csv("PackingMachine.csv")
+pack$machines = factor(pack$machines, labels = c("MC1", "MC2", "MC3"))
+lm3 = lm(weight ~ machines, data = pack)
+anova(lm3)
+pf(59.508, 2, 57, lower.tail = F)
+```
+
+According to the ANOVA table, the F-statistic is equal to 59.508. The p-value is 1.107e-14, which is significantly small to reject the null that three machines have the same performance. 
+
+(b)
+From (a) we can conclude that at least one pair has different performance.
+
+(c)
+```{r, echo = F}
+anova(lm3)
+pf(59.508, 2, 57, lower.tail = F)
+va_hat = 0.2659
+va_hat
+va_o_hat = (15.8262 - 0.2659)/20
+va_o_hat
+```
+
+We apply the same ANOVA and F test as in the fixed effects case, which give an F-statistic of 59.508. So, we reject the null that the variance among operators is equal to zero at the 0.05 level. 
+
+The variance components are estimated to be 0.2659 and 0.778.
+
+(d)
+```{r, echo = F}
+ybar = sum(pack$weight)/60
+t = qt(0.025, 2)
+MSTr = 15.8262
+n = 20
+k = 3
+lower = ybar + t*sqrt(MSTr/(n*k))
+upper = ybar - t*sqrt(MSTr/(n*k))
+(c(lower, upper))
+```
+
+The 95% confidence interval is (47.892, 52.311).
+
+# Question 17
+
+(a)
+```{r, echo = F}
+# Devices
+blood = read.csv("BloodPressure.csv")
+blood$dev = factor(blood$dev, labels = c("Dev1", "Dev2", "Dev3"))
+lm4 = lm(bp~dev, data = blood)
+anova(lm4)
+(f4 = 1e-04)
+(va_hat4 = 88.082)
+(va_o_hat4 = (0.007-88.082)/15) #less than 0 -> =0
+
+# Doctors
+blood2 = read.csv("BloodPressure2.csv")
+blood2$DOC = factor(blood2$DOC, labels = c("Doc1", "Doc2", "Doc3"))
+lm5 = lm(BP~DOC, data = blood2)
+anova(lm5)
+(f5 = 139.1)
+(va_hat5 = 1.784)
+(va_o_hat5 = (248.163 - 1.784)/15) 
+```
+
+For devices, the F statistic is equal to 1e-04 with a p-value close to 1, thus we cannot reject the null which states that the variance among operators in the population is equal to zero. The variance components are 88.082 and 0 respectively.
+
+For doctors, the F statistic is equal to 139.1 with a p-value close to 0, thus we reject the null which states that the variance among operators in the population is equal to zero. The variance components are 1.784 and 16.425 respectively.
+
+(b)
+For devices, we cannot reject the null, thus we conclude that the variance among devices might be 0. For doctors, we reject the null, thus we conclude that the variance among at least on pair of doctors are different.
+
+```{r, eval = F}
+# Devices
+bpbar = sum(blood$bp)/45
+t = qt(0.025, 2)
+MSTr4 = 0.007
+n4 = 15
+k = 3
+lower_dev = bpbar + t*sqrt(MSTr4/(n4*k))
+upper_dev = bpbar - t*sqrt(MSTr4/(n4*k))
+(c(lower_dev, upper_dev))
+
+# Doctors
+BPbar = sum(blood2$BP)/45
+t = qt(0.025, 2)
+MSTr5 = 248.163
+n5 = 15
+k = 3
+lower_doc = BPbar + t*sqrt(MSTr5/(n5*k))
+upper_doc = BPbar - t*sqrt(MSTr5/(n5*k))
+(c(lower_doc, upper_doc))
+```
+
+The 95% confidence interval for the mean blood pressure measured by devices is [128.0128, 128.1201];
+
+The 95% confidence interval for the mean blood pressure measured by doctors is [119.9172, 140.1255].
+
+# Appendix
+```{r eval = F}
+MSR = 21.47
+MSE = 2.39
+f = MSR/MSE
+f
+qf(0.01, 3, 26, lower.tail = F)
+pf(f, 3, 26, lower.tail = F)
+```
+
+```{r, eval = F}
+qc = qtukey(p = 0.99, nmeans = 4, df = 26)/sqrt(2) 
+qc 
+tAB = (65.75-66.10)/(sqrt(MSE)*sqrt((1/8) + (1/7)))
+tAB
+tAC = (62.63-66.10)/(sqrt(MSE)*sqrt((1/9) + (1/7)))
+tAC
+tAD = (63.85-66.10)/(sqrt(MSE)*sqrt((1/6) + (1/7)))
+tAD
+tBC = (62.63-65.75)/(sqrt(MSE)*sqrt((1/9) + (1/8)))
+tBC
+tBD = (63.85-65.75)/(sqrt(MSE)*sqrt((1/6) + (1/8)))
+tBD
+tCD = (63.85-62.63)/(sqrt(MSE)*sqrt((1/6) + (1/9)))
+tCD
+```
+
+```{r, eval = F}
+tcontrast = ((66.1+65.75)/2  -(62.62+63.85)/2)/(sqrt(MSE)*sqrt((1/(7+8)/2+1/(9+6)/2)))
+tcontrast #formula??
+pt(tcontrast, 26, lower.tail = F)
+```
+
+```{r, eval = F}
+data = read.csv("bolt.csv")
+data$type = factor(data$type, labels = c("P&O", "C&W", "HT"))
+lm = lm(value~type, data = data)
+anova(lm)
+
+plot(residuals(lm))
+abline(0,0)
+plot(lm, which = c(1,1))
+abline(0,0)
+
+onebar = sum(data$value[1:10])/10
+twobar = sum(data$value[11:20])/10
+threebar = sum(data$value[21:30])/10
+s_e = sqrt(11.71)
+t12 = (twobar - onebar)/(s_e*sqrt(1/10 + 1/10))
+t12
+t13 = (threebar - onebar)/(s_e*sqrt(1/10 + 1/10))
+t13
+t23 = (threebar - twobar)/(s_e*sqrt(1/10 + 1/10))
+t23
+
+# Bonferroni
+tcr = qt(0.05/(2*3), 27, lower.tail = F) # 3 = 3 choose 2 
+tcr
+# Tukey
+qcr = qtukey(p = 0.95, nmeans = 3, df = 27)/sqrt(2)
+qcr
+```
+
+```{r, eval = F}
+data2 = read.csv("onewaymuzzle.csv")
+data2$Area = factor(data2$Area, labels = c("0.016", "0.030", "0.044",  "0.058"))
+levels(data2$Area)
+lm2 = lm(Velocity ~ Area, data = data2)
+anova(lm2)
+f2 = 4505/637.5
+f2
+pf(f2, 3, 60, lower.tail = F)
+# Bonferroni
+tcrit = qt(0.05/(2*6), 60, lower.tail = F) # 6 = 4 choose 2 
+tcrit
+# Tukey
+qcrit = qtukey(p = 0.95, nmeans = 4, df = 60)/sqrt(2)
+qcrit
+# Multiple Comparisons
+a = sum(data2$Velocity[1:16])/16
+b = sum(data2$Velocity[17:32])/16
+c = sum(data2$Velocity[33:48])/16
+d = sum(data2$Velocity[49:64])/16
+se2 = sqrt(637.5)
+na = nb = nc = nd = 16
+tab = (b - a)/(se2*(sqrt(1/na + 1/nb)))
+tab
+tac = (c - a)/(se2*(sqrt(1/na + 1/nc)))
+tac
+tad = (d - a)/(se2*(sqrt(1/na + 1/nd)))
+tad
+tbc = (c - b)/(se2*(sqrt(1/nb + 1/nc)))
+tbc
+tbd = (d - b)/(se2*(sqrt(1/nb + 1/nd)))
+tbd
+tcd = (d - c)/(se2*(sqrt(1/nc + 1/nd)))
+tcd
+```
+
+```{r, eval = F}
+pack = read.csv("PackingMachine.csv")
+pack$machines = factor(pack$machines, labels = c("MC1", "MC2", "MC3"))
+lm3 = lm(weight ~ machines, data = pack)
+anova(lm3)
+pf(59.508, 2, 57, lower.tail = F)
+```
+
+```{r, eval = F}
+anova(lm3)
+pf(59.508, 2, 57, lower.tail = F)
+va_hat = 0.2659
+va_hat
+va_o_hat = (15.8262 - 0.2659)/20
+va_o_hat
+```
+
+```{r, echo = F}
+ybar = sum(pack$weight)/60
+t = qt(0.025, 2)
+MSTr = 15.8262
+n = 20
+k = 3
+lower = ybar + t*sqrt(MSTr/(n*k))
+upper = ybar - t*sqrt(MSTr/(n*k))
+(c(lower, upper))
+```
+
+```{r, eval = F}
+# Devices
+blood = read.csv("BloodPressure.csv")
+blood$dev = factor(blood$dev, labels = c("Dev1", "Dev2", "Dev3"))
+lm4 = lm(bp~dev, data = blood)
+anova(lm4)
+(f4 = 1e-04)
+(va_hat4 = 88.082)
+(va_o_hat4 = (0.007-88.082)/15) #less than 0 -> =0
+
+# Doctors
+blood2 = read.csv("BloodPressure2.csv")
+blood2$DOC = factor(blood2$DOC, labels = c("Doc1", "Doc2", "Doc3"))
+lm5 = lm(BP~DOC, data = blood2)
+anova(lm5)
+(f5 = 139.1)
+(va_hat5 = 1.784)
+(va_o_hat5 = (248.163 - 1.784)/15) 
+```
+
+```{r, eval = F}
+# Devices
+bpbar = sum(blood$bp)/45
+t = qt(0.025, 2)
+MSTr4 = 0.007
+n4 = 15
+k = 3
+lower_dev = bpbar + t*sqrt(MSTr4/(n4*k))
+upper_dev = bpbar - t*sqrt(MSTr4/(n4*k))
+(c(lower_dev, upper_dev))
+
+# Doctors
+BPbar = sum(blood2$BP)/45
+t = qt(0.025, 2)
+MSTr5 = 248.163
+n5 = 15
+k = 3
+lower_doc = BPbar + t*sqrt(MSTr5/(n5*k))
+upper_doc = BPbar - t*sqrt(MSTr5/(n5*k))
+(c(lower_doc, upper_doc))
+```

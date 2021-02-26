@@ -1,0 +1,88 @@
+---
+title: 'Homework 6: Stat 424'
+author: "Evangeline Lim"
+date: "11/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+## Question 2
+
+```{r q2}
+starch <- read.csv("starch.csv", header=T)
+
+y <-  starch$strength
+x<-starch$thickness
+
+x1.1= matrix(0,length(starch$strength))
+x1.2= matrix(0,length(starch$strength))
+x1.3= matrix(0,length(starch$strength))
+
+i_1 = which(starch$starch=="CA")
+i_2 = which(starch$starch=="CO")
+i_3 = which(starch$starch=="PO")
+
+x1.1 [i_1]= x[i_1]
+x1.2 [i_2]= x[i_2]
+x1.3 [i_3]= x[i_3]
+
+thickness = x1.1+x1.2+x1.3
+
+newStarch = data.frame(y,x1.1,x1.2,x1.3,thickness)
+colnames(newStarch) = c("strength","CA","CO","PO","thickness")
+
+lm <- lm(strength~ thickness+CO+PO, newStarch)
+summary(lm)
+
+lm_aov <- aov(strength~thickness+CO+PO, newStarch)
+summary(lm_aov)
+```
+The new regresion analysis with only three intercept and slope terms show that the thickness parameter shows a greater slope coefficient compared to table 3.10 whereas for CO and PO terms, we have smaller slope coefficients. The ANOVA table for the regression analysis of three terms shows MSE and SSThickness, SSCO, SSPO, SSResiduals is more than the table 3.10.
+
+
+## Question 3
+
+```{r q3}
+data <- read.table("throughput.txt", header=T)
+
+lm <- lm(Throughput~ Day+Operator+Method+Machine, data)
+anova(lm)
+
+
+data$Method <-as.factor(data$Method) ## set as factor
+lm_new <- lm(Throughput~Method, data)
+anova = aov(lm_new)
+
+##multiple comparisons 
+tukey <- TukeyHSD(x = anova, 'Method', conf.level = 0.95)
+tukey
+
+plot(tukey, las=1, col="red")
+```
+From the plot and the tukey multiple comparisons, we see that D vs C is significant at the $\alpha=$ 0.05 level.
+
+## Question 6
+
+```{r q6}
+spring <- read.csv("Spring.csv", header=T)
+##first step
+spring
+
+##step-by-step replacement
+spring[7,]<-""
+spring
+
+spring[3,]<-""
+spring
+
+spring[1,]<-""
+spring
+```
+From the one factor at a time approach, we note that it has ommited key values in the Percentage of Noncracked Springs (90 or 87) and instead returned 79. From this, we can say that the OFAT approach is sometimes inefficient and can miss out optimal settings when used to analyze factorial effects.
+
+##Appendix
+```{r ref.label=knitr::all_labels(), echo = T, eval = T}
+```

@@ -1,0 +1,76 @@
+---
+title: "Stat 424: Homework 1"
+author: "Evangeline Lim"
+date: "9/23/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 9
+
+```{r}
+myFile=read.table('rainfall.txt', header = T)
+
+x_data = 0.44*myFile$x
+rainfall=lm(myFile$y~x_data)
+plot(residuals(rainfall), ylab = "Residuals", main = "a) Residuals")
+abline(0,0)
+
+```
+
+#### a) The regression model shows more negative values from the line (0,0) which leads me to believe that the model is not a good model.
+
+```{r}
+model1 = residuals(lm(myFile$y~myFile$x))
+model2 = residuals(lm(formula=myFile$y~0+myFile$x))
+plot(model1, ylab = "Residuals", main = "Residuals with intercept")
+abline(0,0)
+plot(model2, ylab = "Residuals", main = "Residuals without intercept")
+abline(0,0)
+```
+
+#### b) The residual plot without the intercept gives more positive values from the line (0,0) which leads me to believe that the model without the intercept does not fit the data very well compared to the residual model with the intercept. However, the model with the intercept has significantly more variation and hence, the intercept is significant.
+
+#### c) Yes, in a) and b) we see that the residual plots with no intercept causes the data to be more positive or more negative but the model with the intercept is more varied on the line (0,0). This supports the usage of the model with intercept.
+
+## Question 10
+
+
+```{r pressure, echo=FALSE}
+brain=read.table('brain.txt', header = T)
+plot(brain$BodyWt, brain$BrainWt, xlab= "Body Weight", ylab="Brain Weight")
+
+```
+
+#### a) The plot is clustered and has two outliers which means that the data is heavily skewed. Because the data is clustered, no conclusions can be drawn but the data does seem to be linear.
+
+```{r}
+plot(log(brain$BodyWt), log(brain$BrainWt))
+
+```
+
+#### b) Yes, the log plot now has a clear positive linear relationship.
+
+```{r}
+logBody = log(brain$BodyWt)
+logBrain = log(brain$BrainWt)
+
+lm(logBrain~logBody)
+
+summary(lm(logBrain~logBody))
+
+```
+#### c) From the summary, the percentage of variation (multiple R^2) is 92.07%.
+
+```{r}
+n = 62 
+mean = log(250)
+sd =  sd(logBody, na.rm=TRUE)
+error <- qt(0.975,df=n-2)*sd/sqrt(n)
+(upper = mean + error)
+(lower = mean - error)
+```
+#### d) The confidence interval for the average body weight of 250kg is (4.735,6.308).

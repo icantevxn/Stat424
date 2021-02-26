@@ -1,0 +1,224 @@
+---
+title: 'Stat 424: Homework 4'
+author: "Evangeline Lim"
+date: "11/1/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+##Question 1  a) and b)
+```{r q1, echo = F}
+##Question 1
+data = read.table("weight.txt", header=F)
+##a)
+scale_I = data[1,]
+scale_II = data[2,]
+t.test(scale_I-scale_II)
+t = -3.0813
+
+(tcrit = qt(1-0.025,df = 4))
+
+abs(t)>tcrit
+
+##b)
+(p = 2*pt(-abs(t),df=4))
+
+```
+
+$H_0 = t_I = t_{II}$
+Given that the $t_{paired}$ is greater than the $t_{crit}$, we reject the null hypothesis. Scale I does not give the same measurements as Scale II. The p-value is 0.03688492.
+
+##Question 2
+```{r q2, echo=F}
+##Question 2
+
+b=2
+k=6
+f <- c(1,2,3,4,5,6)
+r <- c(t(as.matrix(data)))
+treatment = gl(k, 1, b*k, factor(f))
+block = gl(b, k, b*k)
+
+lm <- lm(r ~ treatment + block)
+
+anova(lm)
+
+#From ANOVA
+(F_test = 9.4944)
+
+a <- c("f= 9.4944", "t-paired squared=", t^2 )
+print(a, quote=F)
+```
+
+We see that from the previous question 1, the f statistic from the ANOVA is approximately the same as t-paired squared. Hence proven.
+
+\newpage
+
+##Question 3
+
+Given $\alpha_1=\tau_1=0$ we see that the sum to zero constraint of $\alpha_1$ and $\tau_1$ should also equal to 0. To estimate the remaining paremeters we take $\alpha_{ij}-\alpha_{1j}$ to get the remaining paremeters. For $\tau_{ij}-\tau_{i1}$ for us to be able to estimate the parameters given the constraits.
+
+
+## Question 4
+```{r q4, echo = F}
+##Question 4
+data4 = read.table("girder.txt", header = T)
+
+drops <- "Girder"
+newData4 = data4[ , !(names(data4) %in% drops)]
+b = nrow(data4)
+r = c(t(as.matrix(newData4)))
+f <-c(colnames(newData4))
+k = length(f)
+
+treatment = gl(k, 1, b*k, factor(f))
+block = gl(b, k, b*k)
+
+lm <- lm(r ~ block + treatment)
+plot(lm, which=1)
+abline(0,0)
+
+```
+
+The residuals plot shows that the spread of the plots above and below the (0,0) line are relatively equal but there is a large variance in the plots and a few outliers namely 2,34,36. Homoskedacity is also violated because the variance at the two ends are more than the variance at the middle.
+
+```{r q6, echo=F}
+##Question 6
+
+data6 = read.csv("fullgirder.csv", header = T)
+
+drops <- "Girder"
+newData6 = data6[ , !(names(data6) %in% drops)]
+b = nrow(data6)
+r = c(t(as.matrix(newData6)))
+f <-c(colnames(newData6))
+k = length(f)
+
+treatment = gl(k, 1, b*k, factor(f))
+block = gl(b, k, b*k)
+
+lm <- lm(r ~ block + treatment)
+anova(lm)
+
+
+f_test = 23.6429
+
+f_crit = qf(1-0.05,k-1,(b-1)*(k-1))
+
+f_test > f_crit
+
+```
+
+$H_0 = \tau_1=...=\tau_k$ where k = 1,..10.
+
+Since F test is smaller than the F critical, we reject the null hypothesis that the four methods produce the same sheer strength. So, we proceed to Tukey multiple comparisons method.
+
+```{r q6pt2, echo = FALSE} 
+##Question 6 Tukey
+av <- aov(r~ block + treatment)
+
+mc <- TukeyHSD(x=av, 'block', conf.level=0.95)
+mc
+
+sig <- c("4-1,","5-1,", "6-2,", "6-3,", "6-4,","6-5,","7-5,","9-6,","8-6")
+
+print("Pairs that are significant:", quote=F)
+print(sig, quote=F)
+
+```
+
+```{r q6pt3}
+##Question 6 Residuals
+plot(lm, which=1)
+abline(0,0)
+```
+From the residuals plot there are a few outliers but the spread above and below the y=0 line seems even with quite a bit of variability.
+
+#Question 12
+
+```{r q12, echo=F}
+##Question 12
+data12 <- read.table("bolt.txt", header=T)
+data12
+m_ht<- data12[1:10,] %>% select(M.B, HT)
+m_ht
+m_cw <- data12[1:10,] %>% select(M.B, C.W)
+m_cw
+m_po <- data12[1:10,] %>% select(M.B, P.O)
+m_po
+b_ht<- data12[11:20,] %>% select(M.B, HT)
+b_ht
+b_cw <- data12[11:20,] %>% select(M.B, C.W)
+b_cw
+b_po <- data12[11:20,] %>% select(M.B, P.O)
+b_po
+
+z_m_ht = c("z_m_ht = ", log((sd(m_ht$HT))^2))
+print(z_m_ht,quote=F)
+z_m_cw = c("z_m_cw = ", log((sd(m_cw$C.W))^2))
+print(z_m_cw,quote=F)
+z_m_po = c("z_m_po =",log(((sd(m_po$P.O))^2)))
+print(z_m_po,quote=F)
+z_b_ht = c("z_b_ht =",log((sd(b_ht$HT))^2))
+print(z_b_ht,quote=F)
+z_b_cw = c("z_b_cw =",log((sd(b_cw$C.W))^2))
+print(z_b_cw,quote=F)
+z_b_po = c( "z_b_po =", log((sd(b_po$P.O))^2))
+print(z_b_po,quote=F)
+```
+
+We see that B-PO combination has the largest variance followed by B-HT, M-CW, M-HT, B-CW, M-PO. This is in line with the boxplot's spread of each combination. 
+
+
+##Question 13
+We want to let $\alpha_1 = 0$ and $\beta_1=0$
+```{r q13, echo=F}
+##Question 13
+cts<-read.table("composite.txt",header=T)
+
+#ANOVA
+lm <-lm(value~composite + tape_speed + composite:tape_speed, data=cts)
+anova(lm)
+
+#Linear contrast/parameter estimation and model matrix
+lm_s <- lm(cts$value ~ cts$composite+cts$tape_speed+cts$composite:cts$tape_speed, contrasts = list(f = "contr.sum")) 
+summary(lm_s)
+m = model.matrix(lm_s)
+m
+
+#Residual analysis
+plot(lm, which =1 ,pch=23, bg="red", cex=1)
+```
+
+
+
+There are too little samples to properly interpret this residual plot. However, the varaince looks very large and it violates linearity seeing how the points are scattered all over the place. It is hard to determine for sure whether the point 6 and 2 are outliers or not since the sample is so small.
+
+##Appendix
+```{r q1, eval = FALSE}
+```
+
+```{r q2, eval = FALSE}
+```
+
+```{r q4, eval = FALSE}
+```
+
+```{r q6, eval = FALSE}
+```
+
+```{r q6pt2, eval = FALSE}
+```
+
+```{r q6pt3, eval = FALSE}
+```
+
+```{r q12, eval = FALSE}
+```
+
+```{r q13, eval = FALSE}
+```
